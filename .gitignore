@@ -1,0 +1,12 @@
+# folder
+**/.idea/*
+**/out/*
+**/gen/*
+
+#file
+**/*.txt
+**/*.iml
+*.zip
+**/*.o
+**/*.c
+**/*.jar
