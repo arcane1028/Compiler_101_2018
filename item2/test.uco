@@ -1,0 +1,70 @@
+temp       proc 1 2 2
+           sym 2 1 1
+           lod 2 1
+           ldc 10
+           mult
+           retv
+           end
+main       proc 4 2 2
+           sym 2 1 1
+           sym 2 2 1
+           sym 2 3 1
+           sym 2 4 1
+           ldc 0
+           str 2 3
+           ldc 480
+           str 2 2
+           lod 1 1
+           ldc 0
+           eq
+           fjp $$1
+           lod 2 3
+           ldc 0
+           eq
+           fjp $$0
+           ldc 3
+           str 1 1
+$$0        nop
+           ujp $$2
+$$1        nop
+           ldc 33
+           str 1 1
+$$2        nop
+$$3        nop
+           lod 2 2
+           ldc 0
+           gt
+           fjp $$4
+           ldc 33
+           str 2 4
+           lod 2 2
+           ldc 2
+           div
+           str 2 2
+           lod 2 3
+           lod 2 2
+           add
+           str 2 3
+           ujp $$3
+$$4        nop
+           ldp
+           lod 2 4
+           call write
+           ldp
+           lod 1 1
+           call write
+           ldp
+           lod 2 3
+           call write
+           ldp
+           ldp
+           lod 2 3
+           call temp
+           call write
+           end
+           sym 1 1 1
+           sym 1 2 3
+           bgn 2
+           ldp
+           call main
+           end

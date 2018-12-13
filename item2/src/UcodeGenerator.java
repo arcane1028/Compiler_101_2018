@@ -7,7 +7,7 @@ import java.io.IOException;
 
 public class UcodeGenerator {
     static void minigo2ucode(String mgFile) throws IOException {
-        MiniGoLexer lexer = new MiniGoLexer(CharStreams.fromFileName("test.go"));
+        MiniGoLexer lexer = new MiniGoLexer(CharStreams.fromFileName(mgFile));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         MiniGoParser parser = new MiniGoParser(tokens);
         ParseTree tree = parser.program();
