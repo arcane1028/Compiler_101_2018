@@ -15,11 +15,11 @@ public class UcodeGenListener extends MiniGoBaseListener {
     private int currentFunc;
     private int globalOffset;
     private int localOffset;
-    private int currentDepth;
     private int labelCount;
+    private String filename;
 
 
-    public UcodeGenListener() {
+    public UcodeGenListener(String filename) {
         this.newTexts = new ParseTreeProperty<>();
         this.symbol = new ArrayList<>();
         this.symbol.add(new LinkedHashMap<>()); // global
@@ -28,28 +28,27 @@ public class UcodeGenListener extends MiniGoBaseListener {
         this.currentFunc = 0;
         this.globalOffset = 0;
         this.localOffset = 0;
-        this.currentDepth = 1;
         this.labelCount = 0;
+        this.filename = filename;
     }
 
     @Override
     public void enterVar_decl(MiniGoParser.Var_declContext ctx) {
         String ident = ctx.IDENT(0).toString();
         if (ctx.getChildCount() == 3) {
-            symbol.get(0).put(ident, new Symbol(currentDepth, ++globalOffset, 1));
+            symbol.get(0).put(ident, new Symbol(1, ++globalOffset, 1));
 
         } else if (ctx.getChild(2).getText().equals(",")) {
             for (TerminalNode t : ctx.IDENT()) {
-                symbol.get(0).put(t.getText(), new Symbol(currentDepth, ++globalOffset, 1));
+                symbol.get(0).put(t.getText(), new Symbol(1, ++globalOffset, 1));
             }
         } else if (ctx.LITERAL() != null) {
             int size = Integer.parseInt(ctx.LITERAL().getText());
-            symbol.get(0).put(ident, new Symbol(currentDepth, ++globalOffset, size));
+            symbol.get(0).put(ident, new Symbol(1, ++globalOffset, size));
             globalOffset += (size - 1);
         } else {
             System.out.println("var decl error");
         }
-
     }
 
     @Override
@@ -73,10 +72,10 @@ public class UcodeGenListener extends MiniGoBaseListener {
     public void enterLocal_decl(MiniGoParser.Local_declContext ctx) {
         String ident = ctx.IDENT().toString();
         if (ctx.getChildCount() == 3) {
-            symbol.get(currentFunc).put(ident, new Symbol(currentDepth, ++localOffset, 1));
+            symbol.get(currentFunc).put(ident, new Symbol(2, ++localOffset, 1));
         } else if (ctx.LITERAL() != null) {
             int size = Integer.parseInt(ctx.LITERAL().getText());
-            symbol.get(currentFunc).put(ident, new Symbol(currentDepth, ++localOffset, size));
+            symbol.get(currentFunc).put(ident, new Symbol(2, ++localOffset, size));
             localOffset += (size - 1);
         } else {
             System.out.println("local decl error");
@@ -99,23 +98,12 @@ public class UcodeGenListener extends MiniGoBaseListener {
         }
     }
 
-    @Override
-    public void visitTerminal(TerminalNode node) {
-        switch (node.getText()) {
-            case "}":
-                --currentDepth;
-                break;
-            case "{":
-                ++currentDepth;
-        }
-    }
-
     /*****************************************************************/
     @Override
     public void exitProgram(MiniGoParser.ProgramContext ctx) {
         Formatter formatter = null;
         try {
-            formatter = new Formatter("test.uco");
+            formatter = new Formatter(filename);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -240,7 +228,6 @@ public class UcodeGenListener extends MiniGoBaseListener {
             }
         }
         newTexts.put(ctx, formatter.toString());
-
     }
 
     @Override
@@ -290,8 +277,6 @@ public class UcodeGenListener extends MiniGoBaseListener {
 
             newTexts.put(ctx, formatter.toString());
         }
-
-
     }
 
     @Override
@@ -468,8 +453,6 @@ public class UcodeGenListener extends MiniGoBaseListener {
             formatter.format("           sti\n");
             newTexts.put(ctx, formatter.toString());
         }
-
-
     }
 
     @Override
@@ -479,10 +462,8 @@ public class UcodeGenListener extends MiniGoBaseListener {
             formatter.format("%s", newTexts.get(ctx.getChild(i)));
         }
         newTexts.put(ctx, formatter.toString());
-
     }
 
-    // TODO
     private Symbol lookup(String ident) {
         if (symbol.get(currentFunc).containsKey(ident)) {
             return symbol.get(currentFunc).get(ident);

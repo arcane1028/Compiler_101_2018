@@ -17,9 +17,9 @@ func main(zzz int){
         a=33
     }
 
+    var fff int = 33
 
     for x > 0 {
-        var fff int = 33
         x = x / 2
         z = z + x
     }
